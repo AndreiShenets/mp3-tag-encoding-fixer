@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using href.Utils;
 
 namespace Mp3TagsEncodingFixer
 {
@@ -23,6 +13,23 @@ namespace Mp3TagsEncodingFixer
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+
+        private string CorrectStringEncoding(string baseString)
+        {
+            Encoding[] outgoingEncodings = EncodingTools.DetectOutgoingEncodings(baseString);
+
+            if (!outgoingEncodings.Any(encoding => string.Equals(encoding.EncodingName, Encoding.Default.EncodingName)))
+            {
+                byte[] bytes = Encoding.Unicode.GetBytes(baseString);
+
+                byte[] convetedBytes = Encoding.Convert(Encoding.Default, Encoding.UTF8, bytes.Where(b => b != 0).ToArray());
+
+                return Encoding.UTF8.GetString(convetedBytes);
+            }
+
+            return null;
         }
     }
 }
