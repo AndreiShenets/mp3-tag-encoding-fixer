@@ -16,6 +16,22 @@ namespace Mp3TagsEncodingFixer
         }
 
 
+        private void SelectFolder(object sender, RoutedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private void ScanFolder(object sender, RoutedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private void ApplySelectedFixes(object sender, RoutedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+
         private string CorrectStringEncoding(string baseString)
         {
             Encoding[] outgoingEncodings = EncodingTools.DetectOutgoingEncodings(baseString);

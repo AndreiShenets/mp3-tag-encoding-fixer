@@ -1,12 +1,87 @@
 ﻿<Window x:Class="Mp3TagsEncodingFixer.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Mp3TagsEncodingFixer"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:Mp3TagsEncodingFixer"
+    mc:Ignorable="d"
+    Title="Mp3 tag encoding fixer" Height="350" Width="525"
+    d:DataContext="{d:DesignInstance local:MainWindow, IsDesignTimeCreatable=False}"
+>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Label>Mp3 source folder</Label>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox IsReadOnly="True" />
+            <Button Grid.Column="1"
+                Padding="8,0"
+                Click="SelectFolder"
+            >
+                Select folder...
+            </Button>
+        </Grid>
+
+        <Button Grid.Row="2"
+            Margin="0,8,0,0"
+            Click="ScanFolder"
+        >
+            Scan folder
+        </Button>
+
+        <Label Grid.Row="3" >Potential fixes</Label>
+
+        <ItemsControl Grid.Row="4"
+            Margin="0,8,0,0"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ItemsSource="{Binding Path=Mp3s}"
+        >
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="local:Mp3">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            IsChecked="{Binding Path=IsSelected}"
+                        />
+
+                        <TextBlock Grid.Column="1" Text="{Binding Path=TagName}" />
+                        <TextBlock Grid.Column="2" Text="{Binding Path=TagValue}" />
+                        <TextBlock Grid.Column="3" Text="{Binding Path=TagValueFix}" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Grid.Row="5"
+            Margin="0,8,0,0"
+            Click="ApplySelectedFixes"
+        >
+            Apply selected fixes
+        </Button>
     </Grid>
 </Window>
