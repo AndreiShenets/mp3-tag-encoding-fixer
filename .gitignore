@@ -1,0 +1,10 @@
+!packages/repositories.config
+src/packages/
+**/bin
+**/obj
+**/*.csproj.user
+**/*.suo
+**/*sln.DotSettings.user
+**/.vs/
+**/project.lock.json
+**/*.nuget.props
