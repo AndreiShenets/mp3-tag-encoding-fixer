@@ -52,22 +52,19 @@
             ItemsSource="{Binding Path=Mp3s}"
             HorizontalContentAlignment="Stretch"
             Grid.IsSharedSizeScope="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
         >
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel Orientation="Vertical" CanVerticallyScroll="True" />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
 
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="local:Mp3" >
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition SharedSizeGroup="FileName" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="TagName" />
-                            <ColumnDefinition SharedSizeGroup="TagValue" />
-                            <ColumnDefinition SharedSizeGroup="TagValueFix" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition SharedSizeGroup="FileName" Width="700"  />
+                            <ColumnDefinition Width="100" SharedSizeGroup="TagName" />
+                            <ColumnDefinition SharedSizeGroup="TagValue" Width="400" />
+                            <ColumnDefinition SharedSizeGroup="TagValueFix" Width="400" />
                         </Grid.ColumnDefinitions>
 
                         <CheckBox VerticalAlignment="Center"

@@ -20,7 +20,7 @@ namespace Mp3TagsEncodingFixer
     {
         public string SelectedFolder { get; set; }
 
-        public IEnumerable<Mp3> Mp3s { get; private set; }
+        public List<Mp3> Mp3s { get; private set; }
 
 
         public MainWindow()
@@ -73,7 +73,7 @@ namespace Mp3TagsEncodingFixer
         }
 
         // ReSharper disable once InconsistentNaming
-        private List<Mp3> GetMp3sWithCorruptedTags(TextWriter errors, string folder)
+        private List<Mp3> GetMp3sWithCorruptedTags(TextWriter log, string folder)
         {
             IEnumerable<string> fileNames = Directory.EnumerateFiles(folder, "*.mp3", SearchOption.AllDirectories);
 
@@ -93,25 +93,90 @@ namespace Mp3TagsEncodingFixer
                             result.Add(mp3);
                         }
 
-                        //bool result = FillPerformers(file.Tag.Performers, track);
-                        //result = FillAlbumName(file.Tag.Album, track) || result;
-                        //result = FillAlbumPerformers(file.Tag.AlbumArtists, track) || result;
-                        //result = FillTitle(file.Tag.Title, track) || result;
-                        //result = FillGenres(file.Tag.Genres, track) || result;
-                        //result = FillTrackNumber(file.Tag.Track, track) || result;
-                        //result = FillTrackCount(file.Tag.TrackCount, track) || result;
-                        //result = FillDiskNumber(file.Tag.Disc, track) || result;
-                        //result = FillDiskCount(file.Tag.DiscCount, track) || result;
-                        //result = FillComposers(file.Tag.Composers, track) || result;
-                        //result = FillYear(file.Tag.Year, track) || result;
-                        //result = FillSize(track) || result;
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.AlbumArtists), file.Tag.AlbumArtists);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.AlbumArtistsSort), file.Tag.AlbumArtistsSort);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.AlbumSort), file.Tag.AlbumSort);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Comment), file.Tag.Comment);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Composers), file.Tag.Composers);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.ComposersSort), file.Tag.ComposersSort);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Conductor), file.Tag.Conductor);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Genres), file.Tag.Genres);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Lyrics), file.Tag.Lyrics);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Performers), file.Tag.Performers);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.PerformersSort), file.Tag.PerformersSort);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.Title), file.Tag.Title);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
+
+                        mp3 = GetMp3IfTagIsCorrupted(fileName, nameof(file.Tag.TitleSort), file.Tag.TitleSort);
+                        if (mp3 != null)
+                        {
+                            result.Add(mp3);
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    errors.Write(fileName);
-                    errors.WriteLine(":");
-                    errors.WriteLine(e.ToString());
+                    log.Write(fileName);
+                    log.WriteLine(":");
+                    log.WriteLine(e.ToString());
                 }
             }
 
@@ -125,6 +190,7 @@ namespace Mp3TagsEncodingFixer
             {
                 return new Mp3
                     {
+                        IsSelected = true,
                         FileName = fileName,
                         TagName = tagName,
                         TagValue = string.Join(", ", tagValue),
@@ -161,11 +227,154 @@ namespace Mp3TagsEncodingFixer
             return (isCorrupted, fixedValue);
         }
 
-        private void ApplySelectedFixes(object sender, RoutedEventArgs e)
+        private async void ApplySelectedFixes(object sender, RoutedEventArgs e)
         {
-            throw new System.NotImplementedException();
+            List<Mp3> mp3s = Mp3s;
+
+            ApplySelectedFixesButton.IsEnabled = false;
+            try
+            {
+                if (mp3s != null && mp3s.Any(item => item.IsSelected))
+                {
+                    using (StreamWriter stringWriter = new StreamWriter("ApplyFixes.log", false, Encoding.UTF8))
+                    {
+                        Mp3s = await Task<List<Mp3>>.Factory.StartNew(() => ApplySelectedFixes(stringWriter, mp3s));
+                        RaisePropertyChanged(nameof(Mp3s));
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                System.Windows.MessageBox.Show(this, exception.ToString());
+            }
+            finally
+            {
+                ApplySelectedFixesButton.IsEnabled = true;
+            }
         }
 
+        private static List<Mp3> ApplySelectedFixes(TextWriter log, List<Mp3> mp3s)
+        {
+            List<Mp3> appliedFixes = new List<Mp3>();
+
+            IEnumerable<IGrouping<string, Mp3>> mp3sToProcess = mp3s.Where(item => item.IsSelected)
+                .GroupBy(item => item.FileName);
+
+            foreach (IGrouping<string, Mp3> mp3Group in mp3sToProcess)
+            {
+                string fileName = mp3Group.Key;
+
+                try
+                {
+                    using (File file = File.Create(fileName))
+                    {
+                        file.Mode = File.AccessMode.Write;
+
+                        foreach (Mp3 mp3 in mp3Group)
+                        {
+                            switch (mp3.TagName)
+                            {
+                                case nameof(file.Tag.Album):
+                                    file.Tag.Album = CorrectStringEncoding(file.Tag.Album);
+
+                                    break;
+
+                                case nameof(file.Tag.AlbumSort):
+                                    file.Tag.AlbumSort = CorrectStringEncoding(file.Tag.AlbumSort);
+
+                                    break;
+
+                                case nameof(file.Tag.AlbumArtists):
+                                    file.Tag.AlbumArtists = file.Tag.AlbumArtists
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.AlbumArtistsSort):
+                                    file.Tag.AlbumArtistsSort = file.Tag.AlbumArtistsSort
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.Comment):
+                                    file.Tag.Comment = CorrectStringEncoding(file.Tag.Comment);
+
+                                    break;
+
+                                case nameof(file.Tag.Composers):
+                                    file.Tag.Composers = file.Tag.Composers
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.ComposersSort):
+                                    file.Tag.ComposersSort = file.Tag.ComposersSort
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.Conductor):
+                                    file.Tag.Conductor = CorrectStringEncoding(file.Tag.Conductor);
+
+                                    break;
+
+                                case nameof(file.Tag.Genres):
+                                    file.Tag.Genres = file.Tag.Genres
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.Lyrics):
+                                    file.Tag.Lyrics = CorrectStringEncoding(file.Tag.Lyrics);
+
+                                    break;
+
+                                case nameof(file.Tag.Performers):
+                                    file.Tag.Performers = file.Tag.Performers
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.PerformersSort):
+                                    file.Tag.PerformersSort = file.Tag.PerformersSort
+                                        .Select(CorrectStringEncoding)
+                                        .ToArray();
+
+                                    break;
+
+                                case nameof(file.Tag.Title):
+                                    file.Tag.Title = CorrectStringEncoding(file.Tag.Title);
+
+                                    break;
+
+                                case nameof(file.Tag.TitleSort):
+                                    file.Tag.TitleSort = CorrectStringEncoding(file.Tag.TitleSort);
+
+                                    break;
+                            }
+
+                            appliedFixes.Add(mp3);
+                        }
+
+                        file.Save();
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.Write(fileName);
+                    log.WriteLine(":");
+                    log.WriteLine(e.ToString());
+                }
+            }
+
+            return mp3s.Where(item => !appliedFixes.Contains(item)).ToList();
+        }
 
         private static string CorrectStringEncoding(string baseString)
         {
@@ -175,9 +384,10 @@ namespace Mp3TagsEncodingFixer
             {
                 byte[] bytes = Encoding.Unicode.GetBytes(baseString);
 
-                byte[] convetedBytes = Encoding.Convert(Encoding.Default, Encoding.UTF8, bytes.Where(b => b != 0).ToArray());
+                byte[] convertedBytes = Encoding.Convert(Encoding.Default, Encoding.UTF8,
+                    bytes.Where(b => b != 0).ToArray());
 
-                return Encoding.UTF8.GetString(convetedBytes);
+                return Encoding.UTF8.GetString(convertedBytes);
             }
 
             return null;
