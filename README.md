@@ -1,0 +1,1 @@
+A tool to fix encoding in mp3 tags. Scans folder, checks for possible encoding errors and proposes fixes.
