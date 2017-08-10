@@ -54,6 +54,7 @@
             Grid.IsSharedSizeScope="True"
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
+            PreviewKeyDown="UIElement_OnPreviewKeyDown"
         >
 
             <ListBox.ItemTemplate>
@@ -69,7 +70,7 @@
 
                         <CheckBox VerticalAlignment="Center"
                             HorizontalAlignment="Center"
-                            IsChecked="{Binding Path=IsSelected}"
+                            IsChecked="{Binding Path=IsChecked}"
                         />
 
                         <TextBlock Grid.Column="1" Margin="8,0,0,0" Text="{Binding Path=FileName}" />

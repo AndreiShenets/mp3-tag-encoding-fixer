@@ -8,15 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Input;
 using href.Utils;
 using File = TagLib.File;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using ListBox = System.Windows.Controls.ListBox;
 
 namespace Mp3TagsEncodingFixer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : INotifyPropertyChanged
     {
         public string SelectedFolder { get; set; }
 
@@ -57,6 +60,7 @@ namespace Mp3TagsEncodingFixer
                 {
                     using (StreamWriter stringWriter = new StreamWriter("Scan.log", false, Encoding.UTF8))
                     {
+                        // ReSharper disable once AccessToDisposedClosure
                         Mp3s = await Task<List<Mp3>>.Factory.StartNew(() => GetMp3sWithCorruptedTags(stringWriter, folder));
                         RaisePropertyChanged(nameof(Mp3s));
                     }
@@ -190,7 +194,7 @@ namespace Mp3TagsEncodingFixer
             {
                 return new Mp3
                     {
-                        IsSelected = true,
+                        IsChecked = true,
                         FileName = fileName,
                         TagName = tagName,
                         TagValue = string.Join(", ", tagValue),
@@ -234,10 +238,11 @@ namespace Mp3TagsEncodingFixer
             ApplySelectedFixesButton.IsEnabled = false;
             try
             {
-                if (mp3s != null && mp3s.Any(item => item.IsSelected))
+                if (mp3s != null && mp3s.Any(item => item.IsChecked))
                 {
                     using (StreamWriter stringWriter = new StreamWriter("ApplyFixes.log", false, Encoding.UTF8))
                     {
+                        // ReSharper disable once AccessToDisposedClosure
                         Mp3s = await Task<List<Mp3>>.Factory.StartNew(() => ApplySelectedFixes(stringWriter, mp3s));
                         RaisePropertyChanged(nameof(Mp3s));
                     }
@@ -257,7 +262,7 @@ namespace Mp3TagsEncodingFixer
         {
             List<Mp3> appliedFixes = new List<Mp3>();
 
-            IEnumerable<IGrouping<string, Mp3>> mp3sToProcess = mp3s.Where(item => item.IsSelected)
+            IEnumerable<IGrouping<string, Mp3>> mp3sToProcess = mp3s.Where(item => item.IsChecked)
                 .GroupBy(item => item.FileName);
 
             foreach (IGrouping<string, Mp3> mp3Group in mp3sToProcess)
@@ -398,6 +403,17 @@ namespace Mp3TagsEncodingFixer
         protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void UIElement_OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space
+                && sender is ListBox listBox
+                && listBox.SelectedItem is Mp3 mp3)
+            {
+                mp3.IsChecked = !mp3.IsChecked;
+                e.Handled = true;
+            }
         }
     }
 }
