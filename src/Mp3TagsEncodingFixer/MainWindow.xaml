@@ -25,8 +25,9 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Text="{Binding Path=SelectedFolder, Mode=OneWay}" />
-            <Button Grid.Column="1"
+            <TextBox Text="{Binding Path=SelectedFolder}" />
+            <Button
+                Grid.Column="1"
                 Padding="8,0"
                 Click="SelectFolder"
             >
@@ -34,34 +35,39 @@
             </Button>
         </Grid>
 
-        <Button Grid.Row="2"
+        <Button
+            Name="ScanFolderButton"
+            Grid.Row="2"
             Margin="0,8,0,0"
-            Click="ScanFolder"
+            Click="ScanFolderForMp3sWithCorruptedTags"
         >
             Scan folder
         </Button>
 
         <Label Grid.Row="3" >Potential fixes</Label>
 
-        <ItemsControl Grid.Row="4"
+        <ListBox Grid.Row="4"
             Margin="0,8,0,0"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
             ItemsSource="{Binding Path=Mp3s}"
+            HorizontalContentAlignment="Stretch"
+            Grid.IsSharedSizeScope="True"
         >
-            <ItemsControl.ItemsPanel>
+            <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VirtualizingStackPanel Orientation="Vertical" />
+                    <VirtualizingStackPanel Orientation="Vertical" CanVerticallyScroll="True" />
                 </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            </ListBox.ItemsPanel>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="local:Mp3">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="local:Mp3" >
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
+                            <ColumnDefinition SharedSizeGroup="FileName" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TagName" />
+                            <ColumnDefinition SharedSizeGroup="TagValue" />
+                            <ColumnDefinition SharedSizeGroup="TagValueFix" />
                         </Grid.ColumnDefinitions>
 
                         <CheckBox VerticalAlignment="Center"
@@ -69,15 +75,18 @@
                             IsChecked="{Binding Path=IsSelected}"
                         />
 
-                        <TextBlock Grid.Column="1" Text="{Binding Path=TagName}" />
-                        <TextBlock Grid.Column="2" Text="{Binding Path=TagValue}" />
-                        <TextBlock Grid.Column="3" Text="{Binding Path=TagValueFix}" />
+                        <TextBlock Grid.Column="1" Margin="8,0,0,0" Text="{Binding Path=FileName}" />
+                        <TextBlock Grid.Column="2" Margin="8,0,0,0" Text="{Binding Path=TagName}" />
+                        <TextBlock Grid.Column="3" Margin="8,0,0,0" Text="{Binding Path=TagValue}" />
+                        <TextBlock Grid.Column="4" Margin="8,0,0,0" Text="{Binding Path=TagValueFix}" />
                     </Grid>
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <Button Grid.Row="5"
+        <Button
+            Name="ApplySelectedFixesButton"
+            Grid.Row="5"
             Margin="0,8,0,0"
             Click="ApplySelectedFixes"
         >
