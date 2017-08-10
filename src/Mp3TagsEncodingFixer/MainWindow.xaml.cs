@@ -383,19 +383,22 @@ namespace Mp3TagsEncodingFixer
 
         private static string CorrectStringEncoding(string baseString)
         {
-            Encoding[] outgoingEncodings = EncodingTools.DetectOutgoingEncodings(baseString);
-
-            if (!outgoingEncodings.Any(encoding => string.Equals(encoding.EncodingName, Encoding.Default.EncodingName)))
+            if (!string.IsNullOrEmpty(baseString))
             {
-                byte[] bytes = Encoding.Unicode.GetBytes(baseString);
+                Encoding[] outgoingEncodings = EncodingTools.DetectOutgoingEncodings(baseString);
 
-                byte[] convertedBytes = Encoding.Convert(Encoding.Default, Encoding.UTF8,
-                    bytes.Where(b => b != 0).ToArray());
+                if (!outgoingEncodings.Any(encoding => string.Equals(encoding.EncodingName, Encoding.Default.EncodingName)))
+                {
+                    byte[] bytes = Encoding.Unicode.GetBytes(baseString);
 
-                return Encoding.UTF8.GetString(convertedBytes);
+                    byte[] convertedBytes = Encoding.Convert(Encoding.Default, Encoding.UTF8,
+                        bytes.Where(b => b != 0).ToArray());
+
+                    return Encoding.UTF8.GetString(convertedBytes);
+                }
             }
 
-            return null;
+            return baseString;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
